@@ -28,33 +28,27 @@ class TeamController extends Controller
 			['score' => 82, 'team' => 'H'],
 		]);
 		$i = 0;
-		var_dump(
+		return 
 			$scores
 			->sortByDesc('score')
-			->groupBy('score')
-			->values()
 			->map(function ($item, $key) use (&$i) {
-				$i++;
-				var_dump($key);
-				return [
-					//'rank' =>  ($i + $key) + $item->count(),
-					'rank' =>  $key + 1,
-					'teams' => $item->toArray()
-				];
-			})->toArray()
-		);
-		// $ranks = $scores->sortByDesc('score')->countBy('score');
-		
-		// $i = 0;
-		// var_dump($ranks);
-		// var_dump(
-		// 	$scores->sortByDesc('score')->map(function ($item, $key) use (&$i, $ranks) {
-		// 		$item['rank'] = ((int)$ranks[$item['score']] + $i) -1;
-		// 		// $item['rank'] = $i;
-		// 		$i++;
-		// 		return $item;
-		// 	})->all()
-		// );
+					$item['rank'] = ++$i;
+					return $item;		
+				})->groupBy('score')->values()
+				->map(function ($item, $key) {
+					return [
+						'rank' => $item->sortBy('rank')->first()['rank'],
+						'teams' => $item->map(
+							function ($team) {
+								return [
+									'team' => $team['team'],
+									'score' => $team['score']
+								];
+							}
+						)
+					];
+				})
+				->toArray();
 	}
 	/**
 	 * Display a listing of the resource.
